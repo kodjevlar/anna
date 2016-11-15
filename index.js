@@ -1,32 +1,19 @@
-'use strict';
 const Koa = require('koa');
 const Router = require('koa-router');
 const koaBody = require('koa-body');
 
+// Modules
 const responseTime = require('./middleware/response-time');
-const initSlack = require('./services/slack');
+const greeterModule = require('./modules/greetings');
 
-const anna = new Koa();
+const server = new Koa();
 const router = new Router();
+const core = require('./core');
 
-// Services
-initSlack();
+const anna = core.init();
 
-// Middleware
-anna.use(koaBody());
-anna.use(responseTime);
+anna.load(greeterModule);
 
-
-// Routes
-router.get('/', async function loader(ctx, next) {
-  ctx.set('Content-Type', 'application/json');
-  ctx.body = JSON.stringify({
-    message: `I'm alive!`
-  });
-});
-
-anna.use(router.routes());
-
-anna.listen(3001, function() {
-  console.log(`Anna says: I'm alive!`);
+anna.listen(process.env.SLACK_TOKEN, function() {
+  console.log('connected to the internet');
 });
